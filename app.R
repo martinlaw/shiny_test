@@ -1,6 +1,7 @@
 library(shiny)
 library(DT)
 library(tidyverse)
+library(hms)
 
 ui <- fluidPage(
   
@@ -25,8 +26,7 @@ server <- function(input, output) {
   
   #initialize a blank dataframe
   v <- reactiveValues(data = { 
-    data.frame(x = numeric(0),y = numeric(0)) %>% 
-      add_row(x = rep(0,10),y = rep(0,10))
+    data.frame(x = rep(0,10),y = rep(0,10))
   })
   
   #output the datatable based on the dataframe (and make it editable)

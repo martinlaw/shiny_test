@@ -2,13 +2,15 @@
 library(shiny)
 library(dplyr)
 library(DT)
+library(hms)
 
 ### Data
 input_data <- data.frame(Brand = c("Brand1", "Brand2","Brand3"),
-                         ratio = c (.5, .5, .5),
+                         UFH_dose = c (.5, .5, .5),
                          cost = c(2000, 3000, 4000),
+                         time = rep(hms(hours = 12), 3),
                          stringsAsFactors = FALSE) %>% 
-  mutate(updated_price = cost * ratio)
+  mutate(protamine_dose = cost * UFH_dose)
 
 ### Module
 modFunction <- function(input, output, session, data,reset) {
@@ -27,16 +29,16 @@ modFunction <- function(input, output, session, data,reset) {
     str(info)
     
     isolate(
-      if (j %in% match(c("ratio","cost","updated_price"), names(v$data))) {
-        print(match(c("ratio","cost", "updated_price"), names(v$data)))
+      if (j %in% match(c("UFH_dose","cost","protamine_dose"), names(v$data))) {
+        print(match(c("UFH_dose","cost", "protamine_dose"), names(v$data)))
         v$data[i, j] <<- DT::coerceValue(k, v$data[i, j])
         print(v$data)
         
         if (j %in% match("cost", names(v$data))) {
-          v$data$updated_price <<- v$data$cost * v$data$ratio
+          v$data$protamine_dose <<- v$data$cost * v$data$UFH_dose
         }
-        if (j %in% match("ratio", names(v$data))) {
-          v$data$updated_price <<- v$data$cost * v$data$ratio
+        if (j %in% match("UFH_dose", names(v$data))) {
+          v$data$protamine_dose <<- v$data$cost * v$data$UFH_dose
         }
       } else {
         stop("You are not supposed to change this column.") # check to stop the user from editing only few columns
@@ -69,6 +71,8 @@ shinyApp(
     mainPanel(
       
       actionButton("reset", "Reset"),
+      textInput("weight", "Weight"),
+      radioButtons("sex", "Sex", c("F", "M")),
       tags$hr(),
       modFunctionUI("editable")
     )
