@@ -29,7 +29,7 @@ ui <- fluidPage(
         mainPanel(
            plotOutput("distPlot")
         )
-    ) 
+    )
 )
 
 # Define server logic required to draw a histogram
