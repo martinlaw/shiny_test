@@ -9,7 +9,7 @@
 
 library(shiny)
 library(shinyTime)
-ui <- fluidPage(
+ui <- fluidPage(  # define the User Interface: the HTML page that ppl interact with.
   textInput("weight", "Weight"),
   radioButtons("sex", "Sex", c("F", "M")),
   timeInput("time", "Time 1:", value = Sys.time(), seconds = FALSE),
@@ -19,7 +19,7 @@ ui <- fluidPage(
   tableOutput("table")
 )
 
-server <- function(input, output, session) {
+server <- function(input, output, session) { # specifies the behaviour of the app
   # Create a reactive expression
   dataset <- reactive({
     get(input$dataset, "package:datasets")
@@ -33,4 +33,5 @@ server <- function(input, output, session) {
 }
 
 
-shinyApp(ui, server)
+shinyApp(ui, server) # Constructs and starts the Shiny app from the UI and server.
+

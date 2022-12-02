@@ -5,12 +5,11 @@ library(DT)
 library(hms)
 
 ### Data
-input_data <- data.frame(Brand = c("Brand1", "Brand2","Brand3"),
-                         UFH_dose = c (.5, .5, .5),
-                         cost = c(2000, 3000, 4000),
-                         time = rep(hms(hours = 12), 3),
-                         stringsAsFactors = FALSE) %>% 
-  mutate(protamine_dose = cost * UFH_dose)
+input_data <- data.frame(UFH_dose = c (28000, 10000, 11000, 0, 0, 0),
+                         time_of_intervention = rep(hms(hours = 12), 6),
+                         protamine_dose = rep(NA, 6),
+                         stringsAsFactors = FALSE)
+
 
 ### Module
 modFunction <- function(input, output, session, data,reset) {
@@ -29,15 +28,15 @@ modFunction <- function(input, output, session, data,reset) {
     str(info)
     
     isolate(
-      if (j %in% match(c("UFH_dose","cost","protamine_dose"), names(v$data))) {
-        print(match(c("UFH_dose","cost", "protamine_dose"), names(v$data)))
+      if (j %in% match(c("UFH_dose","time_of_intervention"), names(v$data))) {
+        print(match(c("UFH_dose","time_of_intervention"), names(v$data)))
         v$data[i, j] <<- DT::coerceValue(k, v$data[i, j])
         print(v$data)
         
-        if (j %in% match("cost", names(v$data))) {
+        if (j %in% match("UFH_dose", names(v$data))) {
           v$data$protamine_dose <<- v$data$cost * v$data$UFH_dose
         }
-        if (j %in% match("UFH_dose", names(v$data))) {
+        if (j %in% match("time_of_intervention", names(v$data))) {
           v$data$protamine_dose <<- v$data$cost * v$data$UFH_dose
         }
       } else {
@@ -72,6 +71,7 @@ shinyApp(
       
       actionButton("reset", "Reset"),
       textInput("weight", "Weight"),
+      textInput("height", "Height"),
       radioButtons("sex", "Sex", c("F", "M")),
       tags$hr(),
       modFunctionUI("editable")

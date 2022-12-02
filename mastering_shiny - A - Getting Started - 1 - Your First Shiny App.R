@@ -1,3 +1,5 @@
+
+
 # install.packages(c(
 #   "gapminder", "ggforce", "gh", "globals", "openintro", "profvis", 
 #   "RSQLite", "shiny", "shinycssloaders", "shinyFeedback", 
@@ -63,3 +65,23 @@ shinyApp(ui, server)
 #     dataset()
 #   })
 # }
+
+
+
+
+#### Chapter 2: Basic UI ####
+
+# Most input functions in the UI have the same three arguments:
+# 1: the "name", which is how the server accesses it (using input$name).
+# 2: the "label", which is the text that users will see in the app.
+# 3: the "value", which is the default value.
+
+# Similarly, the first argument in the output functions of the UI is "name", and 
+# you then access it in the server using output$name.
+
+# 2.3.2 - Tables
+# For DYNAMIC tables, Hadley recommends
+# dataTableOutput() [in the UI], paired with
+# renderDataTable() [in the server].
+#
+# for greater control on the output of dataTableOutput(), hadley recommends the reactable pkg.
