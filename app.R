@@ -5,23 +5,17 @@ library(hms)
 
 
 
-ui <- fluidPage(
+ui <- basicPage(
   
   # Application title
-  titlePanel("Editable Dataframe and Plot"),
-  
-  # Sidebar
-  sidebarLayout(
-    sidebarPanel(
-      DTOutput("my_datatable"),
-      actionButton("go",label = "Plot Data")
-    ),
-    
-    # Show plot
-    mainPanel(
-      plotOutput("my_plot")
+  titlePanel("PRODOSE2"),
+  mainPanel( actionButton("reset", "Reset"),
+             textInput("weight", "Weight"),
+             textInput("height", "Height"),
+             radioButtons("sex", "Sex", c("F", "M")),
+             tags$hr(),
+             DTOutput("my_datatable")
     )
-  )
 )
 
 server <- function(input, output) {
@@ -51,8 +45,6 @@ server <- function(input, output) {
     isolate(
         if (j %in% match("protamine_dose", names(v$data))) {
           stop("You are not supposed to change this column.") # check to stop the user from editing only few columns
-        }else{
-          
         }
     )
     
