@@ -4,7 +4,6 @@ library(tidyverse)
 library(hms)
 
 # constants that do not change:
-weight_ideal <- data.frame(Male=65, Female=61)
 a <- 0.1
 b <- 0.9
 new_alpha <- log(0.5)/10
@@ -21,19 +20,23 @@ ui <- basicPage(
              radioButtons("sex", "Sex", c("Female", "Male"), "Male"),
              tags$hr(),
              DTOutput("my_datatable"),
-             verbatimTextOutput("algoweight")
-    )
+             # verbatimTextOutput("algoweight")
+             verbatimTextOutput("weight_ideal"),
+             verbatimTextOutput("actual_weight")
+  )
 )
 
 server <- function(input, output) {
   
-  # calculate (one off):
-
-  algo_weight_M <- reactive({min(input$actual_weight, weight_ideal$Male)})
-  algo_weight_F <- reactive({min(input$actual_weight, weight_ideal$Female)})
-  algo_weight <- reactive({ifelse(test=input$sex=="Male", yes=algo_weight_M(), no=algo_weight_F())})
+  # calculate scalars (reactive):
+  weight_ideal <- reactive({ifelse(test=input$sex=="Male", yes=(0.9*input$height)-88, no=(0.9*input$height)-92)})
+  output$weight_ideal <- renderPrint(weight_ideal())
+  output$actual_weight <- renderPrint(input$actual_weight)
+  algo_weight <- reactive({min(input$actual_weight, weight_ideal())})
+#  algo_weight_F <- reactive({min(input$actual_weight, weight_ideal$Female)})
+#  algo_weight <- reactive({ifelse(test=input$sex=="Male", yes=algo_weight_M(), no=algo_weight_F())})
   
-  output$algoweight <- renderPrint(algo_weight())
+#  output$algoweight <- renderPrint(algo_weight())
   
   
   # Assign scalar inputs to their object names etc.
