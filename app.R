@@ -3,6 +3,12 @@ library(DT)
 library(tidyverse)
 library(hms)
 
+# constants that do not change:
+weight_ideal <- data.frame(Male=65, Female=61)
+a <- 0.1
+b <- 0.9
+new_alpha <- log(0.5)/10
+
 
 
 ui <- basicPage(
@@ -10,15 +16,18 @@ ui <- basicPage(
   # Application title
   titlePanel("PRODOSE2"),
   mainPanel( actionButton("reset", "Reset"),
-             textInput("weight", "Weight"),
+             textInput("actual_weight", "Weight"),
              textInput("height", "Height"),
-             radioButtons("sex", "Sex", c("F", "M")),
+             radioButtons("sex", "Sex", c("Female", "Male")),
              tags$hr(),
              DTOutput("my_datatable")
     )
 )
 
 server <- function(input, output) {
+  
+  # Assign scalar inputs to their object names etc.
+  
   
   #initialize a blank dataframe
   v <- reactiveValues(data = { 
