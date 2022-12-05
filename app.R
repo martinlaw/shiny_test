@@ -3,6 +3,8 @@ library(DT)
 library(tidyverse)
 library(hms)
 
+
+
 ui <- fluidPage(
   
   # Application title
@@ -26,7 +28,10 @@ server <- function(input, output) {
   
   #initialize a blank dataframe
   v <- reactiveValues(data = { 
-    data.frame(x = rep(0,10),y = rep(0,10))
+    data.frame(UFH_dose = c (28000, 10000, 11000, 0, 0, 0),
+               time_of_intervention = rep(hms(hours = 12), 6),
+               protamine_dose = rep(NA, 6),
+               stringsAsFactors = FALSE)
   })
   
   #output the datatable based on the dataframe (and make it editable)
@@ -42,22 +47,20 @@ server <- function(input, output) {
     i = as.numeric(info$row)
     j = as.numeric(info$col)
     k = as.numeric(info$value)
-    if(k < 0){ #convert to positive if negative
-      k <- k * -1
-    }
+
+    isolate(
+        if (j %in% match("protamine_dose", names(v$data))) {
+          stop("You are not supposed to change this column.") # check to stop the user from editing only few columns
+        }else{
+          
+        }
+    )
     
     #write values to reactive
     v$data[i,j] <- k
   })
   
-  #render plot
-  output$my_plot <- renderPlot({
-    req(input$go) #require the input button to be non-0 (ie: don't load the plot when the app first loads)
-    isolate(v$data) %>%  #don't react to any changes in the data
-      ggplot(aes(x,y)) +
-      geom_point() +
-      geom_smooth(method = "lm")
-  })
+
   
 }
 

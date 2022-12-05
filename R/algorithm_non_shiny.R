@@ -55,4 +55,3 @@ for(i in 2:rows.minus.1){
 
 
 prot_dose
-i=3
