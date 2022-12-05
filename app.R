@@ -16,15 +16,25 @@ ui <- basicPage(
   # Application title
   titlePanel("PRODOSE2"),
   mainPanel( actionButton("reset", "Reset"),
-             textInput("actual_weight", "Weight"),
-             textInput("height", "Height"),
-             radioButtons("sex", "Sex", c("Female", "Male")),
+             textInput("actual_weight", "Weight", 60),
+             textInput("height", "Height", 170),
+             radioButtons("sex", "Sex", c("Female", "Male"), "Male"),
              tags$hr(),
-             DTOutput("my_datatable")
+             DTOutput("my_datatable"),
+             verbatimTextOutput("algoweight")
     )
 )
 
 server <- function(input, output) {
+  
+  # calculate (one off):
+
+  algo_weight_M <- reactive({min(input$actual_weight, weight_ideal$Male)})
+  algo_weight_F <- reactive({min(input$actual_weight, weight_ideal$Female)})
+  algo_weight <- reactive({ifelse(test=input$sex=="Male", yes=algo_weight_M(), no=algo_weight_F())})
+  
+  output$algoweight <- renderPrint(algo_weight())
+  
   
   # Assign scalar inputs to their object names etc.
   
