@@ -15,14 +15,17 @@ ui <- basicPage(
   # Application title
   titlePanel("PRODOSE2"),
   mainPanel( actionButton("reset", "Reset"),
-             textInput("actual_weight", "Weight", 60),
-             textInput("height", "Height", 170),
+             numericInput("actual_weight", "Weight", 60),
+             numericInput("height", "Height", 170),
              radioButtons("sex", "Sex", c("Female", "Male"), "Male"),
              tags$hr(),
              DTOutput("my_datatable"),
              # verbatimTextOutput("algoweight")
              verbatimTextOutput("weight_ideal"),
-             verbatimTextOutput("actual_weight")
+             verbatimTextOutput("algo_weight"),
+             verbatimTextOutput("UFH_dose_init"),
+             verbatimTextOutput("time_of_intervention_init"),
+             verbatimTextOutput("half_life")
   )
 )
 
@@ -31,18 +34,17 @@ server <- function(input, output) {
   # calculate scalars (reactive):
   weight_ideal <- reactive({ifelse(test=input$sex=="Male", yes=(0.9*input$height)-88, no=(0.9*input$height)-92)})
   output$weight_ideal <- renderPrint(weight_ideal())
+  
   output$actual_weight <- renderPrint(input$actual_weight)
+  
   algo_weight <- reactive({min(input$actual_weight, weight_ideal())})
-#  algo_weight_F <- reactive({min(input$actual_weight, weight_ideal$Female)})
-#  algo_weight <- reactive({ifelse(test=input$sex=="Male", yes=algo_weight_M(), no=algo_weight_F())})
-  
-#  output$algoweight <- renderPrint(algo_weight())
-  
+  output$algo_weight <- renderPrint(algo_weight())
+
   
   # Assign scalar inputs to their object names etc.
   
   
-  #initialize a blank dataframe
+  #initialize a dataframe
   v <- reactiveValues(data = { 
     data.frame(UFH_dose = c (28000, 10000, 11000, 0, 0, 0),
                time_of_intervention = rep(hms(hours = 12), 6),
@@ -56,7 +58,6 @@ server <- function(input, output) {
   })
   
   #when there is any edit to a cell, write that edit to the initial dataframe
-  #check to make sure it's positive, if not convert
   observeEvent(input$my_datatable_cell_edit, {
     #get values
     info = input$my_datatable_cell_edit
@@ -72,8 +73,17 @@ server <- function(input, output) {
     
     #write values to reactive
     v$data[i,j] <- k
+    
   })
   
+  # Assign initial values in table to their own objects:
+  UFH_dose_init <- reactive({v$data[1,1]})
+  time_of_intervention_init <- reactive({v$data[1,2]})
+  half_life <- reactive({26+0.323*UFH_dose_init()/algo_weight()})
+  
+  output$UFH_dose_init <- renderPrint(UFH_dose_init())
+  output$time_of_intervention_init <- renderPrint(time_of_intervention_init())
+  output$half_life <- renderPrint(half_life())
 
   
 }
