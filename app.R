@@ -102,12 +102,13 @@ server <- function(input, output) {
 prot_dose_vector <- reactive({
   time_elapsed <- as.numeric(v$data[-1, 2] - v$data[-length(v$data), 2])/60
   no_rows_minus_1 <- length(time_elapsed)
-  C0 <- c(C0_init(), rep(NA, rows.minus.1))
-  prot_dose <- c(prot_dose_init, rep(NA, rows.minus.1))
-  for(i in 2:rows.minus.1){
-    C0[i] <- UFH_dose[i] + C0[i-1]*a*exp(new_alpha*time_elapsed[i-1]) + C0[i-1]*b*exp(beta*time_elapsed[i-1])
+  C0 <- c(C0_init(), rep(NA, no_rows_minus_1))
+  prot_dose <- c(prot_dose_init(), rep(NA, no_rows_minus_1))
+  for(i in 2:no_rows_minus_1){
+    C0[i] <- v$data[i, 1] + C0[i-1]*a*exp(new_alpha*time_elapsed[i-1]) + C0[i-1]*b*exp(beta()*time_elapsed[i-1])
     prot_dose[i] <- C0[i]/100
   }
+  prot_dose
 })
 
   
