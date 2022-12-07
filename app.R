@@ -52,7 +52,7 @@ server <- function(input, output) {
   
   #initialize a dataframe
   v <- reactiveValues(data = { 
-    data.frame(UFH_dose = c (28000, 10000, 11000, 0, 0, 0),
+    data.frame(UFH_dose = c (28000, 10000, 11000,  rep(NA, 3)),
                time_of_intervention = c(hms(hours = 9, minutes=16), hms(hours = 9, minutes=55), hms(hours = 11, minutes=55), rep(NA, 3)),
                protamine_dose = rep(NA, 6),
                stringsAsFactors = FALSE)
@@ -119,6 +119,12 @@ prot_dose_vector <- eventReactive(input$calculate_prot,{
 
 
 output$protamine <- renderPrint(prot_dose_vector())
+
+  ### Reset data
+observeEvent(input$reset, {
+    updateNumericInput(inputId = "actual_weight", value = 60)
+    updateNumericInput(inputId = "height", value = 170)
+  })
   
 }
 
