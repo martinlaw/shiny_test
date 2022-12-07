@@ -15,6 +15,7 @@ ui <- basicPage(
   # Application title
   titlePanel("PRODOSE2"),
   mainPanel( actionButton("reset", "Reset"),
+             actionButton("calculate_prot", "Calculate!"),
              numericInput("actual_weight", "Weight", 60),
              numericInput("height", "Height", 170),
              radioButtons("sex", "Sex", c("Female", "Male"), "Male"),
@@ -70,15 +71,15 @@ server <- function(input, output) {
     j = as.numeric(info$col)
     k = as.numeric(info$value)
 
-    isolate(
-        if (j %in% match("protamine_dose", names(v$data))) {
-          stop("You are not supposed to change this column.") # check to stop the user from editing final column
-        }
-    )
+    # isolate(
+    #     if (j %in% match("protamine_dose", names(v$data))) {
+    #       stop("You are not supposed to change this column.") # check to stop the user from editing final column
+    #     }
+    # )
     
     #write values to reactive
     v$data[i,j] <- k
-    
+
   })
   
   # Assign initial values in table to their own objects:
@@ -100,17 +101,22 @@ server <- function(input, output) {
 
   #no_of_doses_times <- reactive({sum(!is.na(v$data[,2]))}) # number of rows, ie no. of doses to calculate.
 
-prot_dose_vector <- reactive({
-  time_elapsed <- as.numeric(v$data[-1, 2] - v$data[-length(v$data), 2])/60
-  no_rows_minus_1 <- length(time_elapsed)
-  C0 <- c(C0_init(), rep(NA, no_rows_minus_1))
-  prot_dose <- c(prot_dose_init(), rep(NA, no_rows_minus_1))
-  for(i in 2:no_rows_minus_1){
-    C0[i] <- v$data[i, 1] + C0[i-1]*a*exp(new_alpha*time_elapsed[i-1]) + C0[i-1]*b*exp(beta()*time_elapsed[i-1])
-    prot_dose[i] <- C0[i]/100
+# Reactive expressions required for calculating protamine dose:
+  time_elapsed <- reactive({as.numeric(v$data[-1, 2] - v$data[-length(v$data), 2])/60})
+  no_rows_minus_1 <- reactive({length(time_elapsed())})
+  
+# # Calculate protamine dose:
+prot_dose_vector <- eventReactive(input$calculate_prot,{
+  C0 <- c(C0_init(), rep(NA, no_rows_minus_1()))
+  prot_dose <- c(prot_dose_init(), rep(NA, no_rows_minus_1()))
+  for(i in 2:no_rows_minus_1()){
+    C0[i] <- v$data[i, 1] + C0[i-1]*a*exp(new_alpha*time_elapsed()[i-1]) + C0[i-1]*b*exp(beta()*time_elapsed()[i-1])
+    prot_dose[i] <- round(C0[i]/100)
   }
+  v$data[, 3] <- prot_dose
   prot_dose
 })
+
 
 output$protamine <- renderPrint(prot_dose_vector())
   
