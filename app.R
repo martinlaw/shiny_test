@@ -21,6 +21,7 @@ ui <- basicPage(
              tags$hr(),
              DTOutput("my_datatable"),
              # verbatimTextOutput("algoweight")
+             verbatimTextOutput("protamine"),
              verbatimTextOutput("weight_ideal"),
              verbatimTextOutput("algo_weight"),
              verbatimTextOutput("UFH_dose_init"),
@@ -111,6 +112,7 @@ prot_dose_vector <- reactive({
   prot_dose
 })
 
+output$protamine <- renderPrint(prot_dose_vector())
   
 }
 
