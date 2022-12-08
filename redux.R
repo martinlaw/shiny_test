@@ -2,7 +2,6 @@ library(shiny)
 library(DT)
 library(tidyverse)
 library(hms)
-library(lubridate)
 
 # constants that do not change:
 a <- 0.1
@@ -23,7 +22,6 @@ ui <- basicPage(
              tags$hr(),
              DTOutput("my_datatable"),
              # verbatimTextOutput("algoweight")
-             verbatimTextOutput("class_time"),
              verbatimTextOutput("elapsed"),
              verbatimTextOutput("protamine"),
              verbatimTextOutput("weight_ideal"),
@@ -31,7 +29,7 @@ ui <- basicPage(
              verbatimTextOutput("UFH_dose_init"),
              verbatimTextOutput("time_of_intervention_init"),
              verbatimTextOutput("half_life"),
-
+             
              verbatimTextOutput("prot_dose_init"),
              verbatimTextOutput("beta"),
              verbatimTextOutput("C0_init")
@@ -48,7 +46,7 @@ server <- function(input, output) {
   
   algo_weight <- reactive({min(input$actual_weight, weight_ideal())})
   output$algo_weight <- renderPrint(algo_weight())
-
+  
   
   # Assign scalar inputs to their object names etc.
   
@@ -56,8 +54,7 @@ server <- function(input, output) {
   #initialize a dataframe
   v <- reactiveValues(data = { 
     data.frame(UFH_dose = c (28000, 10000, 11000,  rep(NA, 3)),
-              # time_of_intervention = c(hms(hours = 9, minutes=16), hms(hours = 9, minutes=55), hms(hours = 11, minutes=55), rep(NA, 3)),
-              time_of_intervention=c("09:16", "09:55", "11:55", rep(NA, 3)),
+               time_of_intervention = c(hms(hours = 9, minutes=16), hms(hours = 9, minutes=55), hms(hours = 11, minutes=55), rep(NA, 3)),
                protamine_dose = rep(NA, 6),
                stringsAsFactors = FALSE)
   })
@@ -75,21 +72,20 @@ server <- function(input, output) {
     i = as.numeric(info$row)
     j = as.numeric(info$col)
     k = as.numeric(info$value)
-
+    
     #write values to reactive
     v$data[i,j] <- k
     
-    })
+  })
   
   # Assign initial values in table to their own objects:
   UFH_dose_init <- reactive({v$data[1,1]})
   C0_init <- reactive({UFH_dose_init()})
   prot_dose_init <- reactive({UFH_dose_init()/100})
-
-  time_of_intervention_init <- reactive({hm(v$data[1,2])})
+  
+  time_of_intervention_init <- reactive({v$data[1,2]})
   half_life <- reactive({26+0.323*UFH_dose_init()/algo_weight()})
   beta <- reactive({log(0.5)/half_life()})
-  
   
   output$UFH_dose_init <- renderPrint(UFH_dose_init())
   output$time_of_intervention_init <- renderPrint(time_of_intervention_init())
@@ -98,40 +94,36 @@ server <- function(input, output) {
   output$C0_init <- renderPrint(C0_init())
   output$prot_dose_init <- renderPrint(prot_dose_init())
   output$beta <- renderPrint(beta())
-
+  
   #no_of_doses_times <- reactive({sum(!is.na(v$data[,2]))}) # number of rows, ie no. of doses to calculate.
-
-# # Reactive expressions required for calculating protamine dose:
-#   time_elapsed <- reactive({as.numeric(v$data[-1, 2] - v$data[-length(v$data), 2])/60})
-#   no_rows_minus_1 <- reactive({length(time_elapsed())})
-
-# Reactive expressions required for calculating protamine dose:
-  no_rows <- reactive({sum(!is.na(v$data[,2]))})
-  no_rows_minus_1 <- reactive({no_rows() - 1})
-  time_elapsed <- reactive({as.numeric(hm(v$data[2:no_rows(), 2]) - hm(v$data[1:no_rows_minus_1(), 2]))/60})
+  
+  # # Reactive expressions required for calculating protamine dose:
+  #   time_elapsed <- reactive({as.numeric(v$data[-1, 2] - v$data[-length(v$data), 2])/60})
+  #   no_rows_minus_1 <- reactive({length(time_elapsed())})
+  
+  # Reactive expressions required for calculating protamine dose:
+  time_elapsed <- reactive({as.numeric(v$data[-1, 2] - v$data[-length(v$data[,2]), 2])/60})
   output$elapsed <- renderPrint(time_elapsed())
   
+  no_rows_minus_1 <- reactive({length(time_elapsed())})
   
-# # Calculate protamine dose:
-prot_dose_vector <- eventReactive(input$calculate_prot,{
-  C0 <- c(C0_init(), rep(NA, no_rows_minus_1()))
-  prot_dose <- c(prot_dose_init(), rep(NA, 5))
-  for(i in 2:no_rows()){
-    C0[i] <- v$data[i, 1] + C0[i-1]*a*exp(new_alpha*time_elapsed()[i-1]) + C0[i-1]*b*exp(beta()*time_elapsed()[i-1])
-    prot_dose[i] <- round(C0[i]/100)
-  }
+  # # Calculate protamine dose:
+  prot_dose_vector <- eventReactive(input$calculate_prot,{
+    C0 <- c(C0_init(), rep(NA, no_rows_minus_1()))
+    prot_dose <- c(prot_dose_init(), rep(NA, no_rows_minus_1()))
+    for(i in 2:no_rows_minus_1()){
+      C0[i] <- v$data[i, 1] + C0[i-1]*a*exp(new_alpha*time_elapsed()[i-1]) + C0[i-1]*b*exp(beta()*time_elapsed()[i-1])
+      prot_dose[i] <- round(C0[i]/100)
+    }
+    v$data[, 3] <- prot_dose
+    prot_dose
+  })
   
-  v$data[, 3] <- prot_dose
-  prot_dose
-})
-
-output$class_time <- renderPrint(class(v$data[,2]))
-
-
-output$protamine <- renderPrint(prot_dose_vector())
-
+  
+  output$protamine <- renderPrint(prot_dose_vector())
+  
   ### Reset data
-observeEvent(input$reset, {
+  observeEvent(input$reset, {
     updateNumericInput(inputId = "actual_weight", value = 60)
     updateNumericInput(inputId = "height", value = 170)
   })
