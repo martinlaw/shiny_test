@@ -9,7 +9,11 @@ a <- 0.1
 b <- 0.9
 new_alpha <- log(0.5)/10
 
-
+default_df <-     data.frame(UFH_dose = c (28000, 10000, 11000,  rep(NA, 3)),
+                             # time_of_intervention = c(hms(hours = 9, minutes=16), hms(hours = 9, minutes=55), hms(hours = 11, minutes=55), rep(NA, 3)),
+                             time_of_intervention=c("09:16", "09:55", "11:55", rep(NA, 3)),
+                             protamine_dose = rep(NA, 6),
+                             stringsAsFactors = FALSE)
 
 ui <- basicPage(
   
@@ -56,16 +60,16 @@ server <- function(input, output) {
   
   #initialize a dataframe
   v <- reactiveValues(data = { 
-    data.frame(UFH_dose = c (28000, 10000, 11000,  rep(NA, 3)),
-              # time_of_intervention = c(hms(hours = 9, minutes=16), hms(hours = 9, minutes=55), hms(hours = 11, minutes=55), rep(NA, 3)),
-              time_of_intervention=c("09:16", "09:55", "11:55", rep(NA, 3)),
-               protamine_dose = rep(NA, 6),
-               stringsAsFactors = FALSE)
+    default_df
   })
   
   #output the datatable based on the dataframe (and make it editable)
   output$my_datatable <- renderDT({
-    DT::datatable(v$data, editable = TRUE)
+    DT::datatable(v$data, 
+                  editable = TRUE,
+                  colnames = c("UFH Dose", "Time of intervention", "Protamine dose"),
+                  options = list(dom="t")
+    )
   })
   
   
@@ -136,6 +140,7 @@ observeEvent(input$reset, {
     updateNumericInput(inputId = "actual_weight", value = 60)
     updateNumericInput(inputId = "height", value = 170)
     updateRadioButtons(inputId = "sex", selected = "Male")
+    v$data <- default_df
   })
   
 }
