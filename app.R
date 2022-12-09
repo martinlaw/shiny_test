@@ -136,6 +136,7 @@ output$protamine <- renderPrint(prot_dose_vector())
 observeEvent(input$reset, {
     updateNumericInput(inputId = "actual_weight", value = 60)
     updateNumericInput(inputId = "height", value = 170)
+    updateRadioButtons(inputId = "sex", selected = "Male")
   })
   
 }
