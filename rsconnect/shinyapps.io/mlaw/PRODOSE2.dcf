@@ -1,0 +1,14 @@
+name: PRODOSE2
+title: PRODOSE2
+username:
+account: mlaw
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7856919
+bundleId: 6615727
+url: https://mlaw.shinyapps.io/PRODOSE2/
+when: 1670592818.22858
+lastSyncTime: 1670592818.22862
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app_old.R|app3.R|links.R|mastering_shiny - A - Getting Started - 1 - Your First Shiny App.R|mastering_shiny.R|new.R|R/algorithm_non_shiny.R|redux.R
