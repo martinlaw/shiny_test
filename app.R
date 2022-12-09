@@ -22,7 +22,8 @@ ui <- basicPage(
              radioButtons("sex", "Sex", c("Female", "Male"), "Male"),
              tags$hr(),
              DTOutput("my_datatable"),
-             # verbatimTextOutput("algoweight")
+             # verbatimTextOutput("algoweight") 
+             verbatimTextOutput("time_vec"),
              verbatimTextOutput("class_time"),
              verbatimTextOutput("elapsed"),
              verbatimTextOutput("protamine"),
@@ -74,7 +75,7 @@ server <- function(input, output) {
     info = input$my_datatable_cell_edit
     i = as.numeric(info$row)
     j = as.numeric(info$col)
-    k = as.numeric(info$value)
+    k = info$value
 
     #write values to reactive
     v$data[i,j] <- k
@@ -106,6 +107,7 @@ server <- function(input, output) {
 #   no_rows_minus_1 <- reactive({length(time_elapsed())})
 
 # Reactive expressions required for calculating protamine dose:
+  output$time_vec <- reactive({v$data[, 2]}) 
   no_rows <- reactive({sum(!is.na(v$data[,2]))})
   no_rows_minus_1 <- reactive({no_rows() - 1})
   time_elapsed <- reactive({as.numeric(hm(v$data[2:no_rows(), 2]) - hm(v$data[1:no_rows_minus_1(), 2]))/60})
