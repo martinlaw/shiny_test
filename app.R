@@ -23,19 +23,19 @@ ui <- basicPage(
              tags$hr(),
              DTOutput("my_datatable"),
              # verbatimTextOutput("algoweight") 
-             verbatimTextOutput("time_vec"),
-             verbatimTextOutput("class_time"),
-             verbatimTextOutput("elapsed"),
-             verbatimTextOutput("protamine"),
-             verbatimTextOutput("weight_ideal"),
-             verbatimTextOutput("algo_weight"),
-             verbatimTextOutput("UFH_dose_init"),
-             verbatimTextOutput("time_of_intervention_init"),
-             verbatimTextOutput("half_life"),
+#             verbatimTextOutput("time_vec"),
+#             verbatimTextOutput("class_time"),
+#             verbatimTextOutput("elapsed"),
+#             verbatimTextOutput("protamine"),
+#             verbatimTextOutput("weight_ideal"),
+#             verbatimTextOutput("algo_weight"),
+#             verbatimTextOutput("UFH_dose_init"),
+#             verbatimTextOutput("time_of_intervention_init"),
+#             verbatimTextOutput("half_life"),
 
-             verbatimTextOutput("prot_dose_init"),
-             verbatimTextOutput("beta"),
-             verbatimTextOutput("C0_init")
+#             verbatimTextOutput("prot_dose_init"),
+#             verbatimTextOutput("beta"),
+#             verbatimTextOutput("C0_init")
   )
 )
 
@@ -43,12 +43,12 @@ server <- function(input, output) {
   
   # calculate scalars (reactive):
   weight_ideal <- reactive({ifelse(test=input$sex=="Male", yes=(0.9*input$height)-88, no=(0.9*input$height)-92)})
-  output$weight_ideal <- renderPrint(weight_ideal())
+#  output$weight_ideal <- renderPrint(weight_ideal())
   
   output$actual_weight <- renderPrint(input$actual_weight)
   
   algo_weight <- reactive({min(input$actual_weight, weight_ideal())})
-  output$algo_weight <- renderPrint(algo_weight())
+#  output$algo_weight <- renderPrint(algo_weight())
 
   
   # Assign scalar inputs to their object names etc.
@@ -92,13 +92,13 @@ server <- function(input, output) {
   beta <- reactive({log(0.5)/half_life()})
   
   
-  output$UFH_dose_init <- renderPrint(UFH_dose_init())
-  output$time_of_intervention_init <- renderPrint(time_of_intervention_init())
-  output$half_life <- renderPrint(half_life())
+#  output$UFH_dose_init <- renderPrint(UFH_dose_init())
+#  output$time_of_intervention_init <- renderPrint(time_of_intervention_init())
+#  output$half_life <- renderPrint(half_life())
   
-  output$C0_init <- renderPrint(C0_init())
-  output$prot_dose_init <- renderPrint(prot_dose_init())
-  output$beta <- renderPrint(beta())
+#  output$C0_init <- renderPrint(C0_init())
+#  output$prot_dose_init <- renderPrint(prot_dose_init())
+#  output$beta <- renderPrint(beta())
 
   #no_of_doses_times <- reactive({sum(!is.na(v$data[,2]))}) # number of rows, ie no. of doses to calculate.
 
@@ -111,11 +111,11 @@ server <- function(input, output) {
   no_rows <- reactive({sum(!is.na(v$data[,2]))})
   no_rows_minus_1 <- reactive({no_rows() - 1})
   time_elapsed <- reactive({as.numeric(hm(v$data[2:no_rows(), 2]) - hm(v$data[1:no_rows_minus_1(), 2]))/60})
-  output$elapsed <- renderPrint(time_elapsed())
+#  output$elapsed <- renderPrint(time_elapsed())
   
   
 # # Calculate protamine dose:
-prot_dose_vector <- eventReactive(input$calculate_prot,{
+observeEvent(input$calculate_prot,{
   C0 <- c(C0_init(), rep(NA, no_rows_minus_1()))
   prot_dose <- c(prot_dose_init(), rep(NA, 5))
   for(i in 2:no_rows()){
@@ -124,13 +124,12 @@ prot_dose_vector <- eventReactive(input$calculate_prot,{
   }
   
   v$data[, 3] <- prot_dose
-  prot_dose
 })
 
-output$class_time <- renderPrint(class(v$data[,2]))
+#output$class_time <- renderPrint(class(v$data[,2]))
 
 
-output$protamine <- renderPrint(prot_dose_vector())
+#output$protamine <- renderPrint(prot_dose_vector())
 
   ### Reset data
 observeEvent(input$reset, {
